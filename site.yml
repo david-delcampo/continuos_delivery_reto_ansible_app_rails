@@ -1,0 +1,30 @@
+---
+- include_vars: secrets.yml
+
+- hosts: all
+  roles:
+    - base
+    
+- hosts: sample_rails
+  roles:
+    - rails 
+    - apache2
+    
+- hosts: sample_rails
+  sudo: yes
+  sudo_user: david    
+  tasks: 
+    - name: download app sample_rails
+      git:
+        repo: https://github.com/mhartl/sample_app_3rd_edition
+        dest: /home/david/sample_rails
+        accept_hostkey: yes
+        
+    - name: change permission sample_rails
+      command: chown david:david -R /home/david/sample_rails
+   
+    - name: install dependencies app    
+      command: chdir="/home/david/sample_rails" bundle install --without production
+      
+    - name: run app    
+      command: rails server -p 3000 chdir="/home/david/sample_rails/bin" bundle install --without production      
